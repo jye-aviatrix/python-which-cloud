@@ -13,7 +13,7 @@ logging.basicConfig(
 )
 
 # Use standard urllib request
-timeout=3 # Default timeout 3 seconds
+timeout=2 # Default timeout 2 seconds
 def send_get_request_with_headers(url, headers, timeout=timeout):
     try:
         req = urllib.request.Request(url, headers=headers)
