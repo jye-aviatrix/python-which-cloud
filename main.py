@@ -13,7 +13,7 @@ logging.basicConfig(
 )
 
 # Use standard urllib request
-timeout=5 # Default timeout 5 seconds
+timeout=3 # Default timeout 3 seconds
 def send_get_request_with_headers(url, headers, timeout=timeout):
     try:
         req = urllib.request.Request(url, headers=headers)
@@ -38,6 +38,7 @@ def is_valid_json(data):
     return False
 
 # Check against Azure metadata service
+# https://learn.microsoft.com/en-us/azure/virtual-machines/instance-metadata-service?tabs=linux
 def is_azure():
     try:
         url = "http://169.254.169.254/metadata/instance?api-version=2021-02-01"
@@ -60,6 +61,7 @@ def is_azure():
         return False
 
 # Check against AWS metadata service
+# https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instancedata-data-retrieval.html
 def is_aws():
     try:
         url = "http://169.254.169.254/latest/meta-data/ami-id"
@@ -77,6 +79,7 @@ def is_aws():
         return False
 
 # Check against GCP metadata service
+# https://cloud.google.com/compute/docs/metadata/overview
 def is_gcp():
     try:
         url = "http://metadata.google.internal/computeMetadata/v1/instance/zone"
@@ -94,12 +97,28 @@ def is_gcp():
         return False
 
 
+# Check against OCI metadata service
+# https://docs.oracle.com/en-us/iaas/Content/Compute/Tasks/gettingmetadata.htm#accessing__linux
 def is_oci():
-    # Perform OCI check here
-    pass
+    try:
+        url = "http://169.254.169.254/opc/v2/instance/region"
+        custom_headers = {"Authorization": "Bearer Oracle"}
+        logging.info("Try to check if VM is running in OCI")
+        logging.info("Query %s using header %s", url, custom_headers)
+        response_data = send_get_request_with_headers(
+            url, headers=custom_headers)
+        if isinstance(response_data, str):
+            return True
+        else:
+            return False
+    except Exception as e:
+        logging.error("Exception occurred: %s", str(e))
+        return False
+
 
 
 # Check against Ali Cloud metadata service
+# https://www.alibabacloud.com/help/en/elastic-compute-service/latest/view-instance-metadata
 def is_aliyun():
     try:
         url = "http://100.100.100.200/latest/meta-data/region-id"
