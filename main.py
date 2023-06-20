@@ -1,3 +1,6 @@
+import sys
+assert sys.version_info >= (3,), "This script is designed to run on Python 3 and above."
+
 import urllib.request
 import json
 import logging
